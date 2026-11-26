@@ -189,10 +189,12 @@
                 const sy = b.sq.step(dt), r = b.tilt.step(dt), sx = 1 + (1 - sy) * b.wide;  // 壓扁變寬、拉長變窄
                 el.style.scale = `${sx.toFixed(4)} ${sy.toFixed(4)}`;
                 el.style.rotate = `${r.toFixed(3)}deg`;
+                el.style.setProperty('--sk-lift', (sy - 1).toFixed(4));   // 給 CSS 陰影用：壓下為負、彈起為正
                 if (!b.held && b.sq.settled && b.tilt.settled) {
                     frames.delete(b.tick);
                     b.tilt.x = b.tilt.to = 0;   // 迴旋轉完一圈後歸零，下次仍從 0 開始
                     el.style.scale = ''; el.style.rotate = '';
+                    el.style.removeProperty('--sk-lift');
                     el.classList.remove('sk-live');
                 }
             };

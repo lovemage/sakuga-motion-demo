@@ -6,15 +6,15 @@
     <meta name="robots" content="noindex, nofollow">
     <title>點擊動畫展示 | OceanAds</title>
     <link rel="icon" href="favicon.png">
-    <link rel="stylesheet" href="navigation-motion.css?v=202611261400">
-    <link rel="stylesheet" href="sakuga-motion.css?v=202611261400">
-    <link rel="stylesheet" href="sakuga-controls.css?v=202611261400">
-    <link rel="stylesheet" href="sakuga-widgets.css?v=202611261400">
-    <script src="sakuga-sfx-paths.js?v=202611261400" defer></script>
-    <script src="sakuga-motion.js?v=202611261400" data-auto defer></script>
-    <script src="sakuga-controls.js?v=202611261400" defer></script>
-    <script src="sakuga-widgets.js?v=202611261400" defer></script>
-    <script src="sakuga-prompts.js?v=202611261400" defer></script>
+    <link rel="stylesheet" href="navigation-motion.css?v=202611261406">
+    <link rel="stylesheet" href="sakuga-motion.css?v=202611261406">
+    <link rel="stylesheet" href="sakuga-controls.css?v=202611261406">
+    <link rel="stylesheet" href="sakuga-widgets.css?v=202611261406">
+    <script src="sakuga-sfx-paths.js?v=202611261406" defer></script>
+    <script src="sakuga-motion.js?v=202611261406" data-auto defer></script>
+    <script src="sakuga-controls.js?v=202611261406" defer></script>
+    <script src="sakuga-widgets.js?v=202611261406" defer></script>
+    <script src="sakuga-prompts.js?v=202611261406" defer></script>
     <style>
         @font-face { font-family: 'Leon Sans'; font-weight: 300 900; font-display: swap; src: url('fonts/leon-sans-var.woff2') format('woff2'); }
 
@@ -165,7 +165,8 @@
         .sk-dd-trigger, .sk-lang, .filter-btn, .pr-btn, .mobile-menu, .dock, .article-card-link, .sfx button, .spd {
             background: #fff; color: #1b1b2f; border: 2px solid #1b1b2f; box-shadow: none;
         }
-        .btn-primary:hover, .cta-btn:hover, .btn-outline-light:hover, .sk-back:hover, .pr-btn:hover, .sfx button:hover { background: #1b1b2f; color: #fff; }
+        .pr-btn:hover, .sfx button:hover { background: #1b1b2f; color: #fff; }
+        .btn-primary:hover, .cta-btn:hover, .btn-outline-light:hover, .sk-back:hover { background: #fff; color: #1b1b2f; }
         .filter-btn.active, .pr-btn[aria-expanded='true'] { background: #1b1b2f; color: #fff; }
         .pr-copy, .pr-copy:hover { margin-left: auto; }
         .pr-copy.done { background: #1b1b2f; color: #fff; }
@@ -204,19 +205,19 @@
         <div class="grid">
 
             <section class="card"><header><h2>主要按鈕</h2></header>
-                <div class="stage"><a href="https://oceanads.org/contact-form.html" class="btn btn-primary">免費看網站草稿</a></div>
+                <div class="stage"><a href="https://oceanads.org/contact-form.html" class="btn btn-primary sk-shadow">免費看網站草稿</a></div>
             </section>
 
             <section class="card"><header><h2>行動按鈕</h2></header>
-                <div class="stage"><a href="https://oceanads.org/contact-form.html" class="cta-btn">開始免費諮詢 →</a></div>
+                <div class="stage"><a href="https://oceanads.org/contact-form.html" class="cta-btn sk-shadow">開始免費諮詢 →</a></div>
             </section>
 
             <section class="card"><header><h2>次要按鈕</h2></header>
-                <div class="stage"><a href="https://oceanads.org/portfolio.html" class="btn btn-outline-light">查看作品案例</a></div>
+                <div class="stage"><a href="https://oceanads.org/portfolio.html" class="btn btn-outline-light sk-shadow">查看作品案例</a></div>
             </section>
 
             <section class="card"><header><h2>送出完成</h2></header>
-                <div class="stage"><button type="button" class="btn btn-primary" data-sakuga="send" data-done-label="已送出">送出表單</button></div>
+                <div class="stage"><button type="button" class="btn btn-primary sk-shadow" data-sakuga="send" data-done-label="已送出">送出表單</button></div>
             </section>
 
             <section class="card"><header><h2>核取方塊</h2></header>
@@ -372,7 +373,7 @@
                             <h3 class="card-title">Claude Code 做的資料都是字？一段提示詞改掉 AI 的 4 個壞習慣</h3>
                         </a>
                         <div class="post" id="post" hidden>
-                            <a href="https://oceanads.org/blog/index.html" class="sk-back" data-sakuga="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m6 6-6-6 6-6"/></svg>返回</a>
+                            <a href="https://oceanads.org/blog/index.html" class="sk-back sk-shadow" data-sakuga="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m6 6-6-6 6-6"/></svg>返回</a>
                             <p tabindex="-1" id="post-title">Claude Code 做的資料都是字？一段提示詞改掉 AI 的 4 個壞習慣</p>
                         </div>
                         <div class="veil" id="veil" aria-hidden="true"><i></i><i></i></div>
@@ -382,7 +383,7 @@
 
             <section class="card"><header><h2>返回上一頁</h2></header>
                 <div class="stage">
-                    <a href="https://oceanads.org/blog/index.html" class="sk-back" data-sakuga="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m6 6-6-6 6-6"/></svg>返回文章列表</a>
+                    <a href="https://oceanads.org/blog/index.html" class="sk-back sk-shadow" data-sakuga="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m6 6-6-6 6-6"/></svg>返回文章列表</a>
                 </div>
             </section>
 
