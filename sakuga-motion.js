@@ -8,7 +8,7 @@
  *   <script src="sakuga-sfx-paths.js" defer></script>
  *   <script src="sakuga-motion.js" data-auto defer></script>
  *   - data-auto：依網站既有 class 自動套用（.btn-primary、.mobile-menu、.article-card-link…）
- *   - 個別元素可用 data-sakuga="spin|impact|spark|menu|close|toggle|tag|card|back|dock|menuitem|off" 指定
+ *   - 個別元素可用 data-sakuga="send|spin|impact|spark|menu|close|toggle|tag|card|back|dock|menuitem|off" 指定
  *   - 連結在播放特效時會延後跳頁；跳頁前會在元素上派發可取消的 `sakuga:navigate` 事件
  */
 (() => {
@@ -405,6 +405,60 @@
         }, o);
     }
 
+    // 長翅膀的信：從按鈕彈出 → 翅膀拍動、沿弧線加速飛走、越飛越小，身後拖彩色軌跡
+    function mail(x, y, o = {}) {
+        const s = o.size || 36, life = o.life || 1.3, dir = o.dir || 1;
+        const sx = x, sy = y - 20, ex = x + (o.tx ?? 230) * dir, ey = y + (o.ty ?? -180), qx = x - 60 * dir, qy = y - 120;
+        const trail = [];
+        const wing = (c) => {
+            c.beginPath(); c.moveTo(0, 0);
+            c.quadraticCurveTo(s * 0.25, -s * 0.62, s * 0.88, -s * 0.64);
+            c.quadraticCurveTo(s * 0.8, -s * 0.44, s * 0.64, -s * 0.42);
+            c.quadraticCurveTo(s * 0.6, -s * 0.25, s * 0.44, -s * 0.24);
+            c.quadraticCurveTo(s * 0.38, -s * 0.07, s * 0.18, -s * 0.03);
+            c.closePath();
+        };
+        return fx(life, (c, p, t) => {
+            const P = palette();
+            let px, py, k, rot;
+            if (p < 0.16) {
+                const q = p / 0.16;
+                k = easeOutBack(q) * 1.08; px = sx; py = y - 20 * easeOut(q); rot = -0.12 * dir * q;
+            } else {
+                const u = ((p - 0.16) / 0.84) ** 1.5, a = 1 - u;   // 越飛越快
+                px = a * a * sx + 2 * a * u * qx + u * u * ex;
+                py = a * a * sy + 2 * a * u * qy + u * u * ey;
+                const dx = 2 * a * (qx - sx) + 2 * u * (ex - qx), dy = 2 * a * (qy - sy) + 2 * u * (ey - qy);
+                rot = clamp(Math.atan2(dy, dx * dir) * 0.35, -0.5, 0.5) * dir;
+                k = 1.08 - 0.62 * u;
+            }
+            trail.push([px, py]); if (trail.length > 16) trail.shift();
+            c.save();
+            c.lineCap = 'round';
+            for (let i = 1; i < trail.length; i++) {
+                const f = i / trail.length;
+                c.strokeStyle = P.pop[i % P.pop.length]; c.lineWidth = 3.5 * f * k;
+                c.globalAlpha = f * 0.9;
+                c.beginPath(); c.moveTo(...trail[i - 1]); c.lineTo(...trail[i]); c.stroke();
+            }
+            c.restore();
+            if (p > 0.88) c.globalAlpha = 1 - (p - 0.88) / 0.12;
+            c.translate(px, py); c.rotate(rot); c.scale(k, k);
+            const flap = Math.sin(t * 30) * 0.6, w = s, h = s * 0.66;
+            c.lineJoin = 'round'; c.lineWidth = 2.2; c.strokeStyle = P.outline;
+            for (const side of [-1, 1]) {     // 翅膀在信封後面，從兩側上緣長出
+                c.save(); c.translate(side * w * 0.36, -h * 0.22); c.scale(side, 1); c.rotate(0.32 - flap);
+                wing(c); c.fillStyle = P.paper; c.fill(); c.stroke();
+                c.beginPath(); c.moveTo(s * 0.12, -s * 0.1); c.quadraticCurveTo(s * 0.35, -s * 0.38, s * 0.7, -s * 0.5); c.stroke();
+                c.restore();
+            }
+            c.beginPath(); c.rect(-w / 2, -h / 2, w, h); c.fillStyle = P.paper; c.fill(); c.lineWidth = 2.4; c.stroke();
+            c.beginPath(); c.moveTo(-w / 2, -h / 2); c.lineTo(0, h * 0.08); c.lineTo(w / 2, -h / 2);
+            c.moveTo(-w / 2, h / 2); c.lineTo(-w * 0.1, -h * 0.02); c.moveTo(w / 2, h / 2); c.lineTo(w * 0.1, -h * 0.02); c.lineWidth = 2; c.stroke();
+            c.beginPath(); c.arc(0, h * 0.06, s * 0.09, 0, TAU); c.fillStyle = P.pop[0]; c.fill(); c.lineWidth = 1.6; c.stroke();   // 封蠟
+        }, o);
+    }
+
     // 停止線：物體剛停住時旁邊的兩條小弧線
     function wob(x, y, side, o = {}) {
         const s = o.size || 1;
@@ -606,6 +660,26 @@
         return false;
     };
     const PRESETS = {
+        // 送出：按鈕彈一下，一封長翅膀的信飛出去，「咻～」，飛遠時閃一下
+        send: {
+            press: 0.84, k: 520, d: 15, wide: 0.55, nav: 0,
+            hit(el, r, b, o) {
+                b.sq.v += 4; b.tilt.v += rand(-1, 1) * 40;
+                const cx = r.left + r.width / 2, top = r.top, dir = cx < innerWidth * 0.62 ? 1 : -1;
+                mail(cx, top + 6, { ...o, dir, size: 46 });
+                puff(cx - 18, top, -1, -0.2, { ...o, scale: 0.55, hole: el });
+                puff(cx + 18, top, 1, -0.2, { ...o, scale: 0.55, hole: el });
+                lines(cx, top + 2, { ...o, angle: Math.PI / 2, spread: 0.55, count: 5, len: 24, dist: 6 });
+                later(0.12, () => sfx('xiu', cx - dir * 70, top - 40, { ...o, size: 40 }));
+                later(1.15, () => { kira(cx + 230 * dir, top + 6 - 180, 14, o); confetti(cx + 230 * dir, top + 6 - 180, { ...o, count: 10, power: 0.6 }); });
+                const label = el.dataset.doneLabel;
+                if (label && !el.__sent) {
+                    el.__sent = el.textContent;
+                    later(0.5, () => { el.textContent = label; });
+                    later(2.6, () => { el.textContent = el.__sent; el.__sent = null; });
+                }
+            },
+        },
         // 主要按鈕：迴旋——反色一幀後整顆轉一圈、衝過頭再回正，周圍繞出彩色迴旋弧線，「咻嚕嚕」
         spin: {
             press: 0.82, k: 520, d: 15, wide: 0.55, tk: 150, td: 12, nav: 320,
@@ -859,7 +933,7 @@
             frames.add(w); start();
             return () => frames.delete(w);
         },
-        fx: { puff, burst, ticks, lines, kira, slash, wob, donut, sfx, confetti, shards, splash, ring, smokeRing, check, crescent, blob, swirl },
+        fx: { puff, burst, ticks, lines, kira, slash, wob, donut, sfx, confetti, shards, splash, ring, smokeRing, check, crescent, blob, swirl, mail },
         palette,
         /** 原始特效註冊：effect(life, (ctx, p, t) => {}, { hole, fixed })；life 可為 Infinity，回傳物件有 kill() */
         effect: fx,
