@@ -14,6 +14,7 @@
     <script src="sakuga-motion.js" data-auto defer></script>
     <script src="sakuga-controls.js" defer></script>
     <script src="sakuga-widgets.js" defer></script>
+    <script src="sakuga-prompts.js" defer></script>
     <style>
         @font-face { font-family: 'Leon Sans'; font-weight: 300 900; font-display: swap; src: url('fonts/leon-sans-var.woff2') format('woff2'); }
 
@@ -43,7 +44,7 @@
 
         .page { max-width: 1200px; margin: 0 auto; padding: 48px clamp(16px, 4vw, 40px) 96px; }
         h1 { margin: 0 0 28px; font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
-        .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
         @media (max-width: 1000px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
 
@@ -135,7 +136,7 @@
         .dock-item svg { width: 22px; height: 22px; }
 
         /* 音效字 */
-        .sfx { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; width: 100%; }
+        .sfx { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; width: 100%; }
         .card.wide { grid-column: span 2; }
         @media (max-width: 1000px) { .card.wide { grid-column: span 2; } }
         @media (max-width: 640px) { .card.wide { grid-column: auto; } .sfx { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -143,6 +144,19 @@
         .sfx button:hover { color: #3d5afe; }
         .sfx svg { width: 64px; height: 44px; }
 
+        /* 給 agent 的提示詞 */
+        .pr { display: flex; gap: 6px; padding: 0 14px 14px; }
+        .pr-btn { min-height: 36px; padding: 0 12px; border: 0; border-radius: 8px; background: #fff; color: var(--ex-text-2); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+        .pr-btn:hover { color: #1b1b2f; }
+        .pr-btn[aria-expanded='true'] { background: #1b1b2f; color: #fff; }
+        .pr-copy { margin-left: auto; background: #3d5afe; color: #fff; }
+        .pr-copy:hover { color: #fff; background: #2f49e0; }
+        .pr-copy.done { background: #06d6a0; color: #1b1b2f; }
+        .pr-text { margin: 0 14px 14px; padding: 14px 16px; max-height: 280px; overflow: auto; border-radius: var(--r); background: #fff; color: #1b1b2f; font: 13px/1.7 'Leon Sans', 'Noto Sans TC', system-ui, sans-serif; white-space: pre-wrap; }
+        .pr-text[hidden] { display: none; }
+        .master { margin: -8px 0 28px; background: var(--ex-surface); border-radius: var(--r); padding-top: 14px; }
+        .master .pr { align-items: center; }
+        .master .pr strong { font-size: 15px; margin-right: 6px; }
         .toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); z-index: 60; translate: -50% 16px; opacity: 0; padding: 10px 16px; border-radius: var(--r); background: #1b1b2f; color: #fff; font-size: 14px; transition: opacity 160ms, translate 260ms cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none; }
         .toast.on { opacity: 1; translate: -50% 0; }
     </style>
@@ -150,6 +164,7 @@
 <body class="expo-theme day-mode">
     <main class="page">
         <h1>點擊動畫展示</h1>
+        <div class="master" data-prompt="總覽"></div>
         <div class="grid">
 
             <section class="card"><header><h2>主要按鈕</h2></header>
@@ -413,6 +428,43 @@
         const say = (msg) => { toast.textContent = msg; toast.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => toast.classList.remove('on'), 1800); };
         document.addEventListener('sakuga:lang', (e) => say(e.detail.lang === 'en' ? '→ /en/' : '→ 繁體中文'));
 
+        // ── 給 agent 的提示詞：每張卡片底部可展開、可複製 ──
+        async function copyText(text) {
+            try { await navigator.clipboard.writeText(text); return true; } catch (e) {
+                const ta = document.createElement('textarea');
+                ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+                document.body.append(ta); ta.select();
+                let ok = false; try { ok = document.execCommand('copy'); } catch (_) {}
+                ta.remove(); return ok;
+            }
+        }
+        let prId = 0;
+        function mountPrompt(host, key, label) {
+            const text = (window.SK_PROMPTS || {})[key];
+            if (!text) return;
+            const id = `pr-${++prId}`;
+            const bar = document.createElement('div');
+            bar.className = 'pr';
+            bar.innerHTML = `${label ? `<strong>${label}</strong>` : ''}<button type="button" class="pr-btn" aria-expanded="false" aria-controls="${id}">提示詞</button><button type="button" class="pr-btn pr-copy" data-sakuga="tag">複製提示詞</button>`;
+            const pre = document.createElement('pre');
+            pre.className = 'pr-text'; pre.id = id; pre.hidden = true; pre.textContent = text;
+            host.append(bar, pre);
+            const [toggle, copy] = bar.querySelectorAll('button');
+            toggle.addEventListener('click', () => {
+                const open = pre.hidden;
+                pre.hidden = !open; toggle.setAttribute('aria-expanded', String(open));
+            });
+            copy.addEventListener('click', async () => {
+                const ok = await copyText(text);
+                copy.textContent = ok ? '已複製' : '複製失敗';
+                copy.classList.toggle('done', ok);
+                say(ok ? `已複製「${key}」提示詞` : '複製失敗，請展開後手動選取');
+                setTimeout(() => { copy.textContent = '複製提示詞'; copy.classList.remove('done'); }, 1600);
+            });
+        }
+        mountPrompt($('.master'), '總覽', '給 Agent 的總提示詞');
+        document.querySelectorAll('.card').forEach((card) => mountPrompt(card, card.querySelector('h2').textContent.trim()));
+
         // ── 分類標籤 ──
         document.querySelectorAll('.filters .filter-btn').forEach((b) => b.addEventListener('click', () => {
             document.querySelectorAll('.filters .filter-btn').forEach((x) => { x.classList.toggle('active', x === b); x.setAttribute('aria-pressed', String(x === b)); });
@@ -483,7 +535,7 @@
 
         // ── 音效字 ──
         const grid = $('#sfx');
-        const NAMES = { dong: '咚！', peng: '砰！', shua: '唰！', ding: '叮！', pa: '啪！', xiu: '咻～', hong: '轟轟轟', ka: '喀！', bo: '啵！', cha: '嚓！' };
+        const NAMES = { dong: '咚！', peng: '砰！', shua: '唰！', ding: '叮！', pa: '啪！', xiu: '咻～', hong: '轟轟轟', ka: '喀！', bo: '啵！', cha: '嚓！', lulu: '咻嚕嚕' };
         for (const [id, [w, h, d]] of Object.entries(window.OA_SFX || {})) {
             const b = document.createElement('button');
             b.type = 'button'; b.setAttribute('aria-label', `播放 ${NAMES[id] || id}`);

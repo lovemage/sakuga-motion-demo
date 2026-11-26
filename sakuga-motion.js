@@ -8,7 +8,7 @@
  *   <script src="sakuga-sfx-paths.js" defer></script>
  *   <script src="sakuga-motion.js" data-auto defer></script>
  *   - data-auto：依網站既有 class 自動套用（.btn-primary、.mobile-menu、.article-card-link…）
- *   - 個別元素可用 data-sakuga="impact|spark|menu|close|toggle|tag|card|back|dock|menuitem|off" 指定
+ *   - 個別元素可用 data-sakuga="spin|impact|spark|menu|close|toggle|tag|card|back|dock|menuitem|off" 指定
  *   - 連結在播放特效時會延後跳頁；跳頁前會在元素上派發可取消的 `sakuga:navigate` 事件
  */
 (() => {
@@ -191,6 +191,7 @@
                 el.style.rotate = `${r.toFixed(3)}deg`;
                 if (!b.held && b.sq.settled && b.tilt.settled) {
                     frames.delete(b.tick);
+                    b.tilt.x = b.tilt.to = 0;   // 迴旋轉完一圈後歸零，下次仍從 0 開始
                     el.style.scale = ''; el.style.rotate = '';
                     el.classList.remove('sk-live');
                 }
@@ -379,6 +380,28 @@
             for (let i = bot.length - 1; i >= 0; i--) c.lineTo(...bot[i]);
             c.closePath();
             c.fillStyle = palette().slash; c.fill();
+        }, o);
+    }
+
+    // 迴旋：沿著橢圓繞圈的彩色弧線，頭先衝、尾巴追上、邊轉邊變細並往外擴
+    function swirl(x, y, rx, ry, o = {}) {
+        const n = o.count || 3, w = o.width || 5, rot0 = rand(0, TAU), sweep = o.sweep || Math.PI * 1.25;
+        return fx(o.life || 0.6, (c, p) => {
+            const P = palette(), head = easeOut(clamp(p / 0.6)), tail = easeInOut(clamp((p - 0.18) / 0.82));
+            if (head - tail < 0.01) return;
+            const grow = 1 + easeOut(p) * 0.3, spin = easeOut(p) * Math.PI * 1.6;
+            for (let i = 0; i < n; i++) {
+                const a0 = rot0 + (i / n) * TAU + spin, N = 22, outer = [], inner = [];
+                for (let j = 0; j <= N; j++) {
+                    const v = j / N, u = tail + (head - tail) * v, a = a0 + sweep * u, th = w * Math.sin(Math.PI * v) * (1 - p * 0.5);
+                    outer.push([x + Math.cos(a) * (rx * grow + th), y + Math.sin(a) * (ry * grow + th)]);
+                    inner.push([x + Math.cos(a) * rx * grow, y + Math.sin(a) * ry * grow]);
+                }
+                c.beginPath(); c.moveTo(...inner[0]);
+                for (const pt of outer) c.lineTo(...pt);
+                for (let j = inner.length - 1; j >= 0; j--) c.lineTo(...inner[j]);
+                c.closePath(); c.fillStyle = P.pop[i % P.pop.length]; c.fill();
+            }
         }, o);
     }
 
@@ -583,6 +606,21 @@
         return false;
     };
     const PRESETS = {
+        // 主要按鈕：迴旋——反色一幀後整顆轉一圈、衝過頭再回正，周圍繞出彩色迴旋弧線，「咻嚕嚕」
+        spin: {
+            press: 0.82, k: 520, d: 15, wide: 0.55, tk: 150, td: 12, nav: 320,
+            hit(el, r, b, o) {
+                impactFrame(el);
+                b.tilt.to += 360; b.sq.v += 3;
+                const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+                swirl(cx, cy, r.width * 0.66, r.height * 1.05, o);
+                swirl(cx, cy, r.width * 0.9, r.height * 1.5, { ...o, count: 2, width: 3.5, life: 0.75 });
+                kira(r.right + 4, r.top - 4, 14, o);
+                kira(r.left - 4, r.bottom + 4, 10, { ...o, delay: 0.12 });
+                confetti(cx, cy, { ...o, count: 20, spread: Math.PI, power: 0.9 });
+                later(0.06, () => sfx('lulu', cx + r.width * 0.3, r.top < 90 ? r.bottom + 40 : r.top - 40, { ...o, size: 44 }));
+            },
+        },
         // 主要 CTA：壓扁 → 反色衝擊幀 → 爆炸＋四角煙霧＋指向線＋「咚！」
         impact: {
             press: 0.82, k: 520, d: 15, wide: 0.55, nav: 260,
@@ -717,7 +755,8 @@
         ['.oa-menu-close', 'close'],
         ['#mobile-menu-btn, .mobile-menu', 'menu'],
         ['.theme-toggle, [data-oa-theme]', 'toggle'],
-        ['.btn-primary, .cta-btn, .nav-cta', 'impact'],
+        ['.btn-primary', 'spin'],
+        ['.cta-btn, .nav-cta', 'impact'],
         ['.btn-outline-light, .btn-outline, .read-more-btn, .view-btn, .pf-btn, .demo-btn', 'spark'],
         ['.filter-btn', 'tag'],
         ['.article-card-link', 'card'],
@@ -820,7 +859,7 @@
             frames.add(w); start();
             return () => frames.delete(w);
         },
-        fx: { puff, burst, ticks, lines, kira, slash, wob, donut, sfx, confetti, shards, splash, ring, smokeRing, check, crescent, blob },
+        fx: { puff, burst, ticks, lines, kira, slash, wob, donut, sfx, confetti, shards, splash, ring, smokeRing, check, crescent, blob, swirl },
         palette,
         /** 原始特效註冊：effect(life, (ctx, p, t) => {}, { hole, fixed })；life 可為 Infinity，回傳物件有 kill() */
         effect: fx,
