@@ -1,0 +1,31 @@
+/* OceanAds Sakuga Motion — 搭配 sakuga-motion.js */
+
+/* 特效層：一張蓋滿視窗的 canvas，不擋點擊 */
+canvas.sk-fx {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 2147482999; /* 低於 navigation-motion 的換頁幕 */
+}
+
+/* 彈簧作用中：transform 由 JS 逐幀寫入 scale / rotate，關掉它們的 CSS transition 避免拖影 */
+.sk-live {
+    transition-property: color, background-color, border-color, box-shadow, opacity, filter !important;
+    will-change: scale, rotate;
+    touch-action: manipulation;
+}
+
+/* 衝擊幀：反色只維持一幀 */
+.sk-inv {
+    filter: invert(1) !important;
+    box-shadow: none !important;
+    transition: none !important;
+}
+
+/* 減少動態效果：不位移，只做一次短暫的明度確認 */
+.sk-ack {
+    opacity: 0.62;
+    transition: opacity 90ms ease-out !important;
+}

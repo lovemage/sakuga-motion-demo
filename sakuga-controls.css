@@ -1,0 +1,64 @@
+/* OceanAds Sakuga Controls — 搭配 sakuga-controls.js。顏色一律走 --ex-* token */
+
+/* ───────── 下拉選單 ───────── */
+.sk-dd { position: relative; display: inline-block; }
+.sk-dd-trigger {
+    display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 14px 10px 18px;
+    border: 1px solid var(--ex-border-strong); border-radius: 1px; background: transparent;
+    color: var(--ex-text); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer;
+}
+.sk-dd-trigger:hover, .sk-dd-trigger[aria-expanded='true'] { border-color: var(--ex-ink); color: var(--ex-ink); }
+.sk-dd-chev { width: 16px; height: 16px; flex-shrink: 0; }
+.sk-dd-panel {
+    position: absolute; top: calc(100% + 8px); left: 0; z-index: 20; min-width: 264px; padding: 6px;
+    background: var(--ex-bg); box-shadow: var(--ex-shadow-2); transform-origin: 50% 0;
+}
+.sk-dd-panel[hidden] { display: none; }
+.sk-dd-panel a {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 16px; min-height: 48px; padding: 12px 14px;
+    color: var(--ex-text); text-decoration: none; font-size: 15px;
+}
+.sk-dd-panel a small { font-size: 11px; letter-spacing: 0.06em; color: var(--ex-text-3); }
+.sk-dd-panel a:hover, .sk-dd-panel a:focus-visible { background: var(--ex-surface); color: var(--ex-ink); }
+.sk-dd-panel a:focus-visible { outline: 2px solid var(--ex-link); outline-offset: -2px; }
+
+/* ───────── 語言切換 ───────── */
+.sk-lang {
+    position: relative; display: inline-flex; align-items: stretch; min-height: 44px; padding: 3px;
+    border: 1px solid var(--ex-border-strong); border-radius: 1px; background: transparent;
+    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; overflow: visible;
+}
+.sk-lang:hover { border-color: var(--ex-ink); }
+.sk-lang-ind { position: absolute; top: 3px; bottom: 3px; left: 0; width: 0; background: var(--ex-text); }
+.sk-lang-opt {
+    position: relative; z-index: 1; display: grid; place-items: center; min-width: 36px; padding: 0 10px;
+    color: var(--ex-text-2); transition: color 160ms ease-out; will-change: transform;
+}
+.sk-lang-opt.is-active { color: var(--ex-bg); }
+.sk-lang.is-swapping .sk-lang-opt { color: var(--ex-text); }
+
+/* ───────── 日夜切換：輪子在地平線下方，順時針轉半圈 ───────── */
+.sk-daynight {
+    position: relative; display: inline-block; width: 64px; height: 44px; padding: 0; flex-shrink: 0;
+    border: 1px solid var(--ex-border-strong); border-radius: 1px; background: var(--ex-surface);
+    color: var(--ex-ink); cursor: pointer; overflow: hidden;
+}
+.sk-daynight:hover { border-color: var(--ex-ink); }
+.sk-dn-sky { position: absolute; inset: 0; }
+.sk-dn-wheel { position: absolute; left: 7px; top: 15px; width: 48px; height: 48px; }   /* 圓心在 (31, 39) */
+.sk-dn-sun, .sk-dn-moon { position: absolute; left: 50%; width: 18px; height: 18px; margin-left: -9px; }
+.sk-dn-sun { top: -9px; }
+.sk-dn-moon { bottom: -9px; rotate: 180deg; }        /* 轉到上方時正立 */
+.sk-dn-ground { position: absolute; left: 0; right: 0; bottom: 0; height: 10px; background: var(--ex-surface); border-top: 1px solid var(--ex-border-strong); }
+.sk-dn-stars i {
+    position: absolute; width: 2px; height: 2px; background: currentColor; opacity: 0;
+    transition: opacity 300ms ease-out 120ms;
+}
+.sk-dn-stars i:nth-child(1) { left: 12px; top: 9px; }
+.sk-dn-stars i:nth-child(2) { left: 48px; top: 7px; }
+.sk-dn-stars i:nth-child(3) { left: 53px; top: 19px; }
+.sk-daynight.is-night .sk-dn-stars i { opacity: 0.8; }
+
+@media (prefers-reduced-motion: reduce) {
+    .sk-lang-opt, .sk-dn-stars i { transition-duration: 1ms; }
+}

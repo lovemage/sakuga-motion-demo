@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>點擊動畫展示 | OceanAds</title>
+    <link rel="icon" href="favicon.png">
+    <link rel="stylesheet" href="navigation-motion.css">
+    <link rel="stylesheet" href="sakuga-motion.css">
+    <link rel="stylesheet" href="sakuga-controls.css">
+    <link rel="stylesheet" href="sakuga-widgets.css">
+    <script src="sakuga-sfx-paths.js" defer></script>
+    <script src="sakuga-motion.js" data-auto defer></script>
+    <script src="sakuga-controls.js" defer></script>
+    <script src="sakuga-widgets.js" defer></script>
+    <style>
+        @font-face { font-family: 'Leon Sans'; font-weight: 300 900; font-display: swap; src: url('fonts/leon-sans-var.woff2') format('woff2'); }
+
+        body.expo-theme {
+            /* 介面色（navigation-motion.css / sakuga-controls.css 會讀） */
+            --ex-bg: #ffffff; --ex-surface: #f5f6fa; --ex-ink: #1b1b2f; --ex-text: #1b1b2f;
+            --ex-text-2: #5b5e73; --ex-text-3: #8a8da0; --ex-border: #e7e8ef; --ex-border-strong: #d4d6e2;
+            --ex-link: #3d5afe; --ex-shadow-2: 0 12px 32px rgba(27, 27, 47, 0.14), 0 3px 8px rgba(27, 27, 47, 0.06);
+            /* 特效色 */
+            --sk-paper: #ffffff; --sk-outline: #1b1b2f; --sk-ink: #1b1b2f;
+            --sk-spike: #ff4d6d; --sk-shade: #ffd23f; --sk-kira: #ffd23f; --sk-slash: #3d5afe;
+            --sk-tone: #ff4d6d; --sk-ring: #06d6a0;
+            --sk-pop: #ff4d6d, #3d5afe, #ffb703, #06d6a0, #8338ec;
+            --sk-smoke-line: #1b1b2f; --sk-smoke-shade: #b9c4ff; --sk-smoke-light: #ffffff;
+            --sk-sfx-dong: #ffd23f; --sk-sfx-peng: #ff4d6d; --sk-sfx-shua: #4cc9f0;
+            --sk-sfx-ding: #ffffff; --sk-sfx-pa: #ff8fab; --sk-sfx-xiu: #06d6a0;
+            --sk-sfx-depth: #3d5afe;
+            --r: 10px;
+
+            margin: 0; background: #fff; color: var(--ex-text);
+            font-family: 'Leon Sans', 'Noto Sans TC', 'PingFang TC', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        * { box-sizing: border-box; }
+        ::selection { background: #ffd23f; color: #1b1b2f; }
+        :focus-visible { outline: 2px solid #3d5afe; outline-offset: 3px; }
+
+        .page { max-width: 1200px; margin: 0 auto; padding: 48px clamp(16px, 4vw, 40px) 96px; }
+        h1 { margin: 0 0 28px; font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+        .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+        @media (max-width: 1000px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+
+        /* 卡片 */
+        .card { display: flex; flex-direction: column; background: var(--ex-surface); border-radius: var(--r); min-width: 0; }
+        .card > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px 0 18px; }
+        .card h2 { margin: 0; font-size: 15px; font-weight: 700; white-space: nowrap; }
+        .stage { position: relative; flex: 1; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px; min-height: 240px; padding: 32px 20px; }
+
+        /* 速度拉桿 */
+        .spd { display: flex; align-items: center; gap: 8px; min-width: 0; }
+        .spd output { min-width: 3.2em; text-align: right; font-size: 12px; font-weight: 700; color: var(--ex-text-2); font-variant-numeric: tabular-nums; }
+        .spd input { -webkit-appearance: none; appearance: none; width: 112px; height: 32px; margin: 0; background: transparent; cursor: pointer; }
+        .spd input::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: linear-gradient(#3d5afe, #3d5afe) 0 / var(--fill, 100%) 100% no-repeat, #dfe2ee; }
+        .spd input::-moz-range-track { height: 6px; border-radius: 3px; background: #dfe2ee; }
+        .spd input::-moz-range-progress { height: 6px; border-radius: 3px; background: #3d5afe; }
+        .spd input::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -6px; border: 3px solid #fff; border-radius: 50%; background: #1b1b2f; box-shadow: 0 1px 4px rgba(27, 27, 47, 0.3); }
+        .spd input::-moz-range-thumb { width: 12px; height: 12px; border: 3px solid #fff; border-radius: 50%; background: #1b1b2f; box-shadow: 0 1px 4px rgba(27, 27, 47, 0.3); }
+
+        /* 按鈕 */
+        .btn, .cta-btn, .sk-back { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 26px; border-radius: var(--r); font: inherit; font-size: 15px; font-weight: 700; text-decoration: none; cursor: pointer; transition: background-color 160ms, box-shadow 160ms; }
+        .btn-primary { background: #3d5afe; color: #fff; border: 0; box-shadow: 0 6px 16px rgba(61, 90, 254, 0.32); }
+        .btn-primary:hover { background: #2f49e0; }
+        .cta-btn { background: #ff4d6d; color: #fff; border: 0; box-shadow: 0 6px 16px rgba(255, 77, 109, 0.32); }
+        .cta-btn:hover { background: #f03a5c; }
+        .btn-outline-light { background: #fff; color: #1b1b2f; border: 2px solid #1b1b2f; }
+        .btn-outline-light:hover { background: #fff8db; }
+        .sk-back { padding: 0 20px 0 14px; background: #06d6a0; color: #1b1b2f; border: 0; box-shadow: 0 6px 16px rgba(6, 214, 160, 0.3); }
+        .sk-back svg { width: 18px; height: 18px; }
+
+        /* 漢堡鈕 */
+        .mobile-menu { display: inline-flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; width: 64px; height: 64px; padding: 0; border: 0; border-radius: var(--r); background: #1b1b2f; cursor: pointer; }
+        .mobile-menu span { display: block; width: 28px; height: 3px; border-radius: 2px; background: #fff; }
+        .mobile-menu span:nth-child(2) { width: 20px; background: #ffd23f; }
+
+        /* 選單面板（navigation-motion.css）配色與圓角 */
+        body.expo-theme dialog.mobile-nav::before { background: #ffd23f; }
+        .oa-menu-close { border-radius: var(--r); }
+        body.expo-theme dialog.mobile-nav li a .zh { font-weight: 700; }
+        body.expo-theme dialog.mobile-nav li a:hover .zh { color: #3d5afe !important; }
+
+        /* 控制元件：10px 圓角與色彩 */
+        .sk-dd-trigger, .sk-dd-panel, .sk-lang, .sk-daynight { border-radius: var(--r); }
+        .sk-dd-trigger { background: #fff; border: 2px solid #1b1b2f; }
+        .sk-dd-panel { background: #fff; padding: 6px; }
+        .sk-dd-panel a { border-radius: 7px; }
+        .sk-dd-panel a:hover, .sk-dd-panel a:focus-visible { background: #eef1ff; color: #3d5afe; }
+        .sk-lang { background: #fff; border: 2px solid #1b1b2f; min-height: 48px; font-size: 15px; }
+        .sk-lang-ind { border-radius: 7px; background: #3d5afe; }
+        .sk-lang-opt { min-width: 46px; }
+        .sk-lang-opt.is-active { color: #fff; }
+        .sk-daynight { width: 96px; height: 64px; border: 0; background: #bde8ff; color: #ffb703; transition: background-color 420ms ease-out; }
+        .sk-daynight.is-night { background: #1b1b2f; color: #ffe9a8; }
+        .sk-daynight .sk-dn-wheel { left: 16px; top: 20px; width: 64px; height: 64px; }
+        .sk-daynight .sk-dn-sun, .sk-daynight .sk-dn-moon { width: 26px; height: 26px; margin-left: -13px; }
+        .sk-daynight .sk-dn-sun { top: -13px; }
+        .sk-daynight .sk-dn-moon { bottom: -13px; }
+        .sk-daynight .sk-dn-ground { height: 16px; background: #06d6a0; border-top: 0; }
+        .sk-daynight.is-night .sk-dn-ground { background: #0b8f6c; }
+        .sk-daynight .sk-dn-stars i { width: 3px; height: 3px; border-radius: 50%; background: #fff; }
+        .sk-daynight .sk-dn-stars i:nth-child(1) { left: 14px; top: 12px; }
+        .sk-daynight .sk-dn-stars i:nth-child(2) { left: 72px; top: 9px; }
+        .sk-daynight .sk-dn-stars i:nth-child(3) { left: 82px; top: 28px; }
+
+        /* 分類標籤 */
+        .filters { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+        .filter-btn { min-height: 40px; padding: 0 14px; border: 0; border-radius: var(--r); background: #fff; color: var(--ex-text-2); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .filter-btn:hover { color: #1b1b2f; }
+        .filter-btn.active { background: #8338ec; color: #fff; }
+
+        /* 文章卡片 ↔ 文章頁 */
+        .blog { position: relative; width: 100%; max-width: 300px; border-radius: var(--r); overflow: hidden; }
+        .blog [hidden] { display: none !important; }
+        .article-card-link { display: block; background: #fff; border-radius: var(--r); color: inherit; text-decoration: none; overflow: hidden; box-shadow: 0 4px 14px rgba(27, 27, 47, 0.08); }
+        .article-card-link img { display: block; width: 100%; height: auto; aspect-ratio: 5 / 2; object-fit: cover; }
+        .card-title { margin: 0; padding: 12px 14px 14px; font-size: 14px; line-height: 1.45; font-weight: 700; }
+        .article-card-link:hover .card-title { color: #3d5afe; }
+        .post { display: grid; gap: 12px; justify-items: start; padding: 4px 0; }
+        .post p { margin: 0; font-size: 14px; line-height: 1.5; font-weight: 700; }
+        .veil { position: absolute; inset: 0; z-index: 2; pointer-events: none; visibility: hidden; border-radius: var(--r); overflow: hidden; }
+        .veil.on { visibility: visible; pointer-events: auto; }
+        .veil i { position: absolute; inset: 0; background: #ffd23f; }
+        .veil i + i { background: #3d5afe; }
+
+        /* Dock */
+        .dock { display: flex; gap: 4px; padding: 6px; background: #fff; border-radius: var(--r); box-shadow: 0 6px 18px rgba(27, 27, 47, 0.1); }
+        .dock-item { display: inline-grid; place-items: center; width: 48px; height: 48px; border: 0; border-radius: 8px; background: transparent; color: #5b5e73; cursor: pointer; text-decoration: none; }
+        .dock-item:hover { background: #f0f2ff; color: #3d5afe; }
+        .dock-item svg { width: 22px; height: 22px; }
+
+        /* 音效字 */
+        .sfx { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; width: 100%; }
+        .card.wide { grid-column: span 2; }
+        @media (max-width: 1000px) { .card.wide { grid-column: span 2; } }
+        @media (max-width: 640px) { .card.wide { grid-column: auto; } .sfx { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        .sfx button { display: grid; place-items: center; height: 72px; border: 0; border-radius: var(--r); background: #fff; color: #1b1b2f; cursor: pointer; }
+        .sfx button:hover { color: #3d5afe; }
+        .sfx svg { width: 64px; height: 44px; }
+
+        .toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); z-index: 60; translate: -50% 16px; opacity: 0; padding: 10px 16px; border-radius: var(--r); background: #1b1b2f; color: #fff; font-size: 14px; transition: opacity 160ms, translate 260ms cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none; }
+        .toast.on { opacity: 1; translate: -50% 0; }
+    </style>
+</head>
+<body class="expo-theme day-mode">
+    <main class="page">
+        <h1>點擊動畫展示</h1>
+        <div class="grid">
+
+            <section class="card"><header><h2>主要按鈕</h2></header>
+                <div class="stage"><a href="https://oceanads.org/contact-form.html" class="btn btn-primary">免費看網站草稿</a></div>
+            </section>
+
+            <section class="card"><header><h2>行動按鈕</h2></header>
+                <div class="stage"><a href="https://oceanads.org/contact-form.html" class="cta-btn">開始免費諮詢 →</a></div>
+            </section>
+
+            <section class="card"><header><h2>次要按鈕</h2></header>
+                <div class="stage"><a href="https://oceanads.org/portfolio.html" class="btn btn-outline-light">查看作品案例</a></div>
+            </section>
+
+            <section class="card"><header><h2>送出完成</h2></header>
+                <div class="stage"><button type="button" class="btn btn-primary" data-skw="done" data-done-label="已送出">送出表單</button></div>
+            </section>
+
+            <section class="card"><header><h2>核取方塊</h2></header>
+                <div class="stage">
+                    <label class="skw-check" data-skw="check"><input type="checkbox" class="skw-sr"><span class="skw-box"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>記住我</label>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>單選</h2></header>
+                <div class="stage">
+                    <div class="skw-radio" data-skw="radio" role="radiogroup" aria-label="方案">
+                        <label><input type="radio" name="plan" class="skw-sr" checked><span class="skw-dot"><i></i></span>基本方案</label>
+                        <label><input type="radio" name="plan" class="skw-sr"><span class="skw-dot"><i></i></span>進階方案</label>
+                        <label><input type="radio" name="plan" class="skw-sr"><span class="skw-dot"><i></i></span>買斷方案</label>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>評分</h2></header>
+                <div class="stage">
+                    <div class="skw-rating" data-skw="rating" role="radiogroup" aria-label="評分">
+                        <button type="button" role="radio" aria-checked="false" aria-label="1 顆星"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4L2.8 9.5l6.4-.8z"/></svg></button><button type="button" role="radio" aria-checked="false" aria-label="2 顆星"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4L2.8 9.5l6.4-.8z"/></svg></button><button type="button" role="radio" aria-checked="false" aria-label="3 顆星"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4L2.8 9.5l6.4-.8z"/></svg></button><button type="button" role="radio" aria-checked="false" aria-label="4 顆星"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4L2.8 9.5l6.4-.8z"/></svg></button><button type="button" role="radio" aria-checked="false" aria-label="5 顆星"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4L2.8 9.5l6.4-.8z"/></svg></button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>開關</h2></header>
+                <div class="stage">
+                    <button type="button" class="skw-switch" data-skw="switch" role="switch" aria-checked="false" aria-label="通知"><span class="skw-flood"></span><span class="skw-knob"></span></button>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>滑桿</h2></header>
+                <div class="stage">
+                    <div class="skw-slider" data-skw="slider" data-unit="%">
+                        <input type="range" min="0" max="100" value="30" aria-label="音量">
+                        <div class="skw-rail"><i class="skw-fill"></i></div>
+                        <span class="skw-thumb"></span>
+                        <span class="skw-bubble" aria-hidden="true">30%</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>輸入框</h2></header>
+                <div class="stage">
+                    <label class="skw-input" data-skw="input"><span class="skw-sr">Email</span><input type="email" placeholder="you@example.com" autocomplete="off"></label>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>分頁</h2></header>
+                <div class="stage">
+                    <div class="skw-tabs" data-skw="tabs" role="tablist" aria-label="帳戶">
+                        <span class="skw-tab-ind" aria-hidden="true"></span>
+                        <button type="button" role="tab" aria-selected="true">總覽</button>
+                        <button type="button" role="tab" aria-selected="false">個人資料</button>
+                        <button type="button" role="tab" aria-selected="false">設定</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>進度條</h2></header>
+                <div class="stage" style="flex-direction:column">
+                    <div class="skw-progress" data-skw="progress" id="prog" role="progressbar" aria-label="上傳中" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <div class="skw-bar"><i></i></div>
+                        <div class="skw-ground"></div>
+                        <span class="skw-pct">0%</span>
+                    </div>
+                    <button type="button" class="filter-btn" id="prog-go">開始上傳</button>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>通知</h2></header>
+                <div class="stage">
+                    <button type="button" class="filter-btn" id="toast-go" style="background:#1b1b2f;color:#fff">儲存設定</button>
+                    <div class="skw-toast" data-skw="toast" id="skw-toast" role="status">
+                        <span class="skw-toast-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+                        <span class="skw-toast-msg">已儲存！</span>
+                        <button type="button" class="skw-toast-x" aria-label="關閉通知"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>提示</h2></header>
+                <div class="stage" style="align-items:flex-end;padding-bottom:40px">
+                    <span class="skw-tip" data-skw="tip">
+                        <button type="button" aria-label="為什麼需要 Email" aria-describedby="tip1" aria-expanded="false">?</button>
+                        <span role="tooltip" id="tip1">我們只用 Email 寄送報價與收據。</span>
+                    </span>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>選單</h2></header>
+                <div class="stage">
+                    <button class="mobile-menu" type="button" data-open-menu aria-label="開啟導覽選單" aria-controls="mobile-nav" aria-haspopup="dialog" aria-expanded="false"><span></span><span></span><span></span></button>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>下拉選單</h2></header>
+                <div class="stage" style="align-items:flex-start">
+                    <div class="sk-dd" data-sk-dropdown>
+                        <button class="sk-dd-trigger" type="button" data-sakuga="tag" aria-controls="dd-services">服務項目<svg class="sk-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+                        <div class="sk-dd-panel" id="dd-services" hidden>
+                            <a href="https://oceanads.org/fast-ecommerce.html" data-sakuga="off"><span>網站與電商</span><small>WEB</small></a>
+                            <a href="https://oceanads.org/seo-advanced.html" data-sakuga="off"><span>Google 排名</span><small>SEO</small></a>
+                            <a href="https://oceanads.org/ai-service.html" data-sakuga="off"><span>AI 自動化</span><small>AI</small></a>
+                            <a href="https://oceanads.org/telegram-bot-service.html" data-sakuga="off"><span>Telegram 機器人</span><small>BOT</small></a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>語言切換</h2></header>
+                <div class="stage">
+                    <button class="sk-lang" type="button" data-sk-lang data-sakuga="tag" data-current="zh">
+                        <span class="sk-lang-ind" aria-hidden="true"></span>
+                        <span class="sk-lang-opt" lang="zh-Hant" aria-hidden="true">中</span>
+                        <span class="sk-lang-opt" lang="en" aria-hidden="true">EN</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>日夜切換</h2></header>
+                <div class="stage">
+                    <button class="sk-daynight" type="button" data-sk-daynight data-sakuga="toggle" aria-label="切換為夜間模式">
+                        <span class="sk-dn-sky" aria-hidden="true">
+                            <span class="sk-dn-stars"><i></i><i></i><i></i></span>
+                            <span class="sk-dn-wheel">
+                                <svg class="sk-dn-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.6" fill="currentColor" stroke="none"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.5 1.5M17.2 17.2l1.5 1.5M5.3 18.7l1.5-1.5M17.2 6.8l1.5-1.5"/></svg>
+                                <svg class="sk-dn-moon" viewBox="0 0 24 24"><path d="M15.5 3.2a8.8 8.8 0 1 0 5.3 13.6A7.2 7.2 0 0 1 15.5 3.2Z" fill="currentColor"/></svg>
+                            </span>
+                            <span class="sk-dn-ground"></span>
+                        </span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>分類標籤</h2></header>
+                <div class="stage">
+                    <div class="filters" role="group" aria-label="文章分類">
+                        <button class="filter-btn active" type="button" aria-pressed="true">全部</button>
+                        <button class="filter-btn" type="button" aria-pressed="false">AI 與科技</button>
+                        <button class="filter-btn" type="button" aria-pressed="false">數位行銷</button>
+                        <button class="filter-btn" type="button" aria-pressed="false">創業策略</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>選文章</h2></header>
+                <div class="stage">
+                    <div class="blog">
+                        <a href="https://oceanads.org/blog/article-98.html" class="article-card-link" id="post-card">
+                            <img src="images/claude-code-visual-prompt.webp" alt="" width="1600" height="640">
+                            <h3 class="card-title">Claude Code 做的資料都是字？一段提示詞改掉 AI 的 4 個壞習慣</h3>
+                        </a>
+                        <div class="post" id="post" hidden>
+                            <a href="https://oceanads.org/blog/index.html" class="sk-back" data-sakuga="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m6 6-6-6 6-6"/></svg>返回</a>
+                            <p tabindex="-1" id="post-title">Claude Code 做的資料都是字？一段提示詞改掉 AI 的 4 個壞習慣</p>
+                        </div>
+                        <div class="veil" id="veil" aria-hidden="true"><i></i><i></i></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>返回上一頁</h2></header>
+                <div class="stage">
+                    <a href="https://oceanads.org/blog/index.html" class="sk-back" data-sakuga="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m6 6-6-6 6-6"/></svg>返回文章列表</a>
+                </div>
+            </section>
+
+            <section class="card"><header><h2>文章 Dock</h2></header>
+                <div class="stage">
+                    <div class="dock" role="navigation" aria-label="快速導覽">
+                        <a class="dock-item" href="https://oceanads.org/index.html" aria-label="首頁"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3zM9 20v-7h6v7"/></svg></a>
+                        <a class="dock-item" href="https://oceanads.org/blog/index.html" aria-label="全部文章"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></a>
+                        <button class="dock-item" type="button" aria-label="分享"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
+                        <button class="dock-item" type="button" aria-label="回到頁首"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 14 6-6 6 6"/></svg></button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card wide"><header><h2>音效字</h2></header>
+                <div class="stage"><div class="sfx" id="sfx"></div></div>
+            </section>
+
+        </div>
+    </main>
+
+    <dialog class="mobile-nav" id="mobile-nav" aria-label="網站導覽">
+        <div class="oa-menu-sheet">
+            <div class="oa-menu-header"><span>OCEANADS <small>海水不可斗量數位工作室</small></span><button type="button" class="oa-menu-close" aria-label="關閉導覽選單"><span></span><span></span></button></div>
+            <ul>
+                <li style="--oa-order:0"><a href="https://oceanads.org/index.html"><span class="zh">首頁</span><span class="en">Home</span></a></li>
+                <li style="--oa-order:1"><a href="https://oceanads.org/fast-ecommerce.html"><span class="zh">網站與電商</span><span class="en">Web Design</span></a></li>
+                <li style="--oa-order:2"><a href="https://oceanads.org/video-production.html"><span class="zh">影片拍攝剪輯</span><span class="en">Video</span></a></li>
+                <li style="--oa-order:3"><a href="https://oceanads.org/seo-advanced.html"><span class="zh">Google 排名</span><span class="en">SEO</span></a></li>
+                <li style="--oa-order:4"><a href="https://oceanads.org/ai-service.html"><span class="zh">AI 自動化</span><span class="en">AI Service</span></a></li>
+                <li style="--oa-order:5"><a href="https://oceanads.org/geo-report.html"><span class="zh">AI 搜尋曝光</span><span class="en">GEO</span></a></li>
+                <li style="--oa-order:6"><a href="https://oceanads.org/portfolio.html"><span class="zh">作品案例</span><span class="en">Portfolio</span></a></li>
+                <li style="--oa-order:7"><a href="https://oceanads.org/contact-form.html"><span class="zh">免費諮詢</span><span class="en">Let's Talk</span></a></li>
+            </ul>
+        </div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const K = window.OASakuga;
+        const $ = (s, r = document) => r.querySelector(s);
+        const reduced = () => K.reduced();
+
+        // ── 每張卡片一支速度拉桿（0.1×–1×），在卡片內按下時套用 ──
+        let menuSpeed = 1;
+        document.querySelectorAll('.card').forEach((card, i) => {
+            const title = card.querySelector('h2').textContent;
+            const wrap = document.createElement('label');
+            wrap.className = 'spd';
+            wrap.innerHTML = `<input type="range" min="0.1" max="1" step="0.05" value="1" aria-label="${title} 播放速度"><output>1.00×</output>`;
+            card.querySelector('header').append(wrap);
+            const input = wrap.querySelector('input'), out = wrap.querySelector('output');
+            const sync = () => {
+                const v = Number(input.value);
+                out.textContent = `${v.toFixed(2)}×`;
+                input.style.setProperty('--fill', `${((v - 0.1) / 0.9) * 100}%`);
+            };
+            input.addEventListener('input', sync);
+            sync();
+            const apply = (e) => {
+                if (e.target.closest('.spd')) return;
+                const s = Number(input.value);
+                K.set({ timeScale: s });
+                if (card.querySelector('[data-open-menu]')) menuSpeed = s;
+            };
+            card.addEventListener('pointerdown', apply, true);
+            card.addEventListener('keydown', apply, true);
+        });
+        const menu = $('#mobile-nav');
+        menu.addEventListener('pointerdown', () => K.set({ timeScale: menuSpeed }), true);
+        menu.addEventListener('keydown', () => K.set({ timeScale: menuSpeed }), true);
+        const wait = (ms) => (reduced() ? 0 : ms / K.state.timeScale);
+
+        // ── 通知 ──
+        const toast = $('#toast');
+        let tt;
+        const say = (msg) => { toast.textContent = msg; toast.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => toast.classList.remove('on'), 1800); };
+        document.addEventListener('sakuga:lang', (e) => say(e.detail.lang === 'en' ? '→ /en/' : '→ 繁體中文'));
+
+        // ── 分類標籤 ──
+        document.querySelectorAll('.filters .filter-btn').forEach((b) => b.addEventListener('click', () => {
+            document.querySelectorAll('.filters .filter-btn').forEach((x) => { x.classList.toggle('active', x === b); x.setAttribute('aria-pressed', String(x === b)); });
+        }));
+
+        // ── 選單 ──
+        const opener = $('[data-open-menu]');
+        function openMenu() {
+            if (menu.open) return;
+            menu.showModal(); opener.setAttribute('aria-expanded', 'true');
+            requestAnimationFrame(() => requestAnimationFrame(() => menu.classList.add('is-open')));
+        }
+        function closeMenu() {
+            if (!menu.open) return;
+            menu.classList.remove('is-open'); opener.setAttribute('aria-expanded', 'false');
+            setTimeout(() => { menu.close(); opener.focus(); }, wait(470));
+        }
+        opener.addEventListener('click', () => setTimeout(openMenu, wait(90)));
+        $('.oa-menu-close').addEventListener('click', () => setTimeout(closeMenu, wait(120)));
+        menu.addEventListener('cancel', (e) => { e.preventDefault(); closeMenu(); });
+
+        // ── 選文章 ↔ 文章頁（換頁幕方向相反）──
+        const card = $('#post-card'), post = $('#post'), veil = $('#veil');
+        const [p1, p2] = veil.querySelectorAll('i');
+        async function wipe(dir, swap) {
+            if (reduced()) { swap(); return; }
+            const ts = K.state.timeScale, from = dir > 0 ? '101%' : '-101%', to = dir > 0 ? '-101%' : '101%';
+            const ease = 'cubic-bezier(.76,0,.24,1)';
+            const go = (el, a, b, d, delay) => el.animate([{ transform: `translateY(${a})` }, { transform: `translateY(${b})` }], { duration: d / ts, delay: delay / ts, easing: ease, fill: 'both' }).finished;
+            veil.classList.add('on');
+            await Promise.all([go(p1, from, '0', 380, 0), go(p2, from, '0', 380, 60)]);
+            swap();
+            await Promise.all([go(p2, '0', to, 420, 60), go(p1, '0', to, 420, 120)]);
+            veil.classList.remove('on');
+        }
+        function simulate(a) {
+            if (a === card) { wipe(1, () => { card.hidden = true; post.hidden = false; $('#post-title').focus({ preventScroll: true }); }); return; }
+            if (post.contains(a)) { wipe(-1, () => { post.hidden = true; card.hidden = false; card.focus({ preventScroll: true }); }); return; }
+            if (menu.contains(a)) closeMenu();
+            say('→ ' + a.getAttribute('href').replace('https://oceanads.org/', ''));
+        }
+        document.addEventListener('sakuga:navigate', (e) => { e.preventDefault(); const a = e.target; setTimeout(() => simulate(a), e.detail.delay); });
+        document.addEventListener('click', (e) => {
+            const a = e.target.closest('a[href]');
+            if (!a || e.defaultPrevented) return;
+            e.preventDefault(); simulate(a);
+        });
+
+        // ── 進度條：模擬一段忽快忽慢的上傳 ──
+        const prog = $('#prog'), go = $('#prog-go');
+        let simTimer = null;
+        go.addEventListener('click', () => {
+            const P = prog.skw;
+            clearTimeout(simTimer);
+            P.reset();
+            go.textContent = '重新上傳';
+            let v = 0;
+            const step = () => {
+                v = Math.min(1, v + (Math.random() < 0.25 ? 0.22 : 0.07));
+                P.set(v);
+                if (v < 1) simTimer = setTimeout(step, (260 + Math.random() * 320) / K.state.timeScale);
+            };
+            simTimer = setTimeout(step, 200 / K.state.timeScale);
+        });
+
+        // ── 通知 ──
+        $('#toast-go').addEventListener('click', () => $('#skw-toast').skw.show('已儲存！'));
+
+        // ── 音效字 ──
+        const grid = $('#sfx');
+        const NAMES = { dong: '咚！', peng: '砰！', shua: '唰！', ding: '叮！', pa: '啪！', xiu: '咻～', hong: '轟轟轟', ka: '喀！', bo: '啵！', cha: '嚓！' };
+        for (const [id, [w, h, d]] of Object.entries(window.OA_SFX || {})) {
+            const b = document.createElement('button');
+            b.type = 'button'; b.setAttribute('aria-label', `播放 ${NAMES[id] || id}`);
+            b.innerHTML = `<svg viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${d}" fill="currentColor"/></svg>`;
+            b.addEventListener('click', () => {
+                if (reduced()) return;
+                const r = b.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+                K.fx.sfx(id, cx, cy - 10, { size: 64, tone: id === 'ding' });
+                K.fx.ticks(cx, cy - 10, 44, { count: 3 });
+                K.fx.confetti(cx, cy - 20, { count: 12, power: 0.8 });
+            });
+            grid.append(b);
+        }
+    });
+    </script>
+</body>
+</html>
