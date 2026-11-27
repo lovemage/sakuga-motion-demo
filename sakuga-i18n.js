@@ -97,6 +97,8 @@
         '全部文章': ['All articles', 'すべての記事', '전체 글'],
         '分享': ['Share', '共有', '공유'],
         '回到頁首': ['Back to top', 'ページトップへ', '맨 위로'],
+        'GitHub 原始碼': ['Source on GitHub', 'GitHub でソースを見る', 'GitHub 소스 코드'],
+        '由 OceanAds 海水不可斗量數位工作室製作': ['Made by OceanAds', 'OceanAds 制作', 'OceanAds 제작'],
         // 頁面腳本用到的字
         '提示詞': ['Prompt', 'プロンプト', '프롬프트'],
         '複製提示詞': ['Copy prompt', 'プロンプトをコピー', '프롬프트 복사'],

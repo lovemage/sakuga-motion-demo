@@ -17,20 +17,20 @@
             setTimeout(() => document.documentElement.classList.remove('i18n-wait'), 3000);
         }
     </script>
-    <link rel="stylesheet" href="navigation-motion.css?v=202611270800">
-    <link rel="stylesheet" href="sakuga-motion.css?v=202611270800">
-    <link rel="stylesheet" href="sakuga-controls.css?v=202611270800">
-    <link rel="stylesheet" href="sakuga-widgets.css?v=202611270800">
-    <script src="sakuga-sfx-paths.js?v=202611270800" defer></script>
-    <script src="sakuga-sfx-paths.intl.js?v=202611270800" defer></script>
-    <script src="sakuga-i18n.js?v=202611270800" defer></script>
-    <script src="sakuga-motion.js?v=202611270800" data-auto defer></script>
-    <script src="sakuga-controls.js?v=202611270800" defer></script>
-    <script src="sakuga-widgets.js?v=202611270800" defer></script>
-    <script src="sakuga-prompts.js?v=202611270800" defer></script>
-    <script src="sakuga-prompts.en.js?v=202611270800" defer></script>
-    <script src="sakuga-prompts.ja.js?v=202611270800" defer></script>
-    <script src="sakuga-prompts.ko.js?v=202611270800" defer></script>
+    <link rel="stylesheet" href="navigation-motion.css?v=202611271000">
+    <link rel="stylesheet" href="sakuga-motion.css?v=202611271000">
+    <link rel="stylesheet" href="sakuga-controls.css?v=202611271000">
+    <link rel="stylesheet" href="sakuga-widgets.css?v=202611271000">
+    <script src="sakuga-sfx-paths.js?v=202611271000" defer></script>
+    <script src="sakuga-sfx-paths.intl.js?v=202611271000" defer></script>
+    <script src="sakuga-i18n.js?v=202611271000" defer></script>
+    <script src="sakuga-motion.js?v=202611271000" data-auto defer></script>
+    <script src="sakuga-controls.js?v=202611271000" defer></script>
+    <script src="sakuga-widgets.js?v=202611271000" defer></script>
+    <script src="sakuga-prompts.js?v=202611271000" defer></script>
+    <script src="sakuga-prompts.en.js?v=202611271000" defer></script>
+    <script src="sakuga-prompts.ja.js?v=202611271000" defer></script>
+    <script src="sakuga-prompts.ko.js?v=202611271000" defer></script>
     <style>
         html.i18n-wait body { visibility: hidden; }
         @font-face { font-family: 'Leon Sans'; font-weight: 300 900; font-display: swap; src: url('fonts/leon-sans-var.woff2') format('woff2'); }
@@ -71,6 +71,15 @@
         .langs a { padding: 6px 12px; border-radius: 7px; color: #1b1b2f; font-size: 14px; font-weight: 700; text-decoration: none; }
         .langs a:hover { background: #f5f6fa; }
         .langs a[aria-current='page'] { background: #1b1b2f; color: #fff; }
+        .top-links { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .repo { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 2px solid #1b1b2f; border-radius: var(--r); color: #1b1b2f; font-size: 14px; font-weight: 700; text-decoration: none; }
+        .repo:hover { background: #1b1b2f; color: #fff; }
+        .repo svg { width: 18px; height: 18px; flex: none; }
+
+        /* 頁尾 */
+        .foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 14px; margin-top: 56px; padding-top: 28px; border-top: 2px solid #1b1b2f; font-size: 14px; color: var(--ex-text-2); }
+        .foot a { color: #1b1b2f; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+        .foot a:hover { text-decoration-thickness: 2px; }
         .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
         @media (max-width: 1000px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
@@ -229,7 +238,10 @@
     <main class="page">
         <div class="top">
             <h1>點擊動畫展示</h1>
-            <nav class="langs" data-lang-picker aria-label="語言"></nav>
+            <div class="top-links">
+                <a class="repo" href="https://github.com/lovemage/sakuga-motion-demo" data-real-link><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>GitHub 原始碼</a>
+                <nav class="langs" data-lang-picker aria-label="語言"></nav>
+            </div>
         </div>
         <div class="master" data-prompt="總覽"></div>
         <div class="grid">
@@ -433,6 +445,11 @@
             </section>
 
         </div>
+        <footer class="foot">
+            <span>由 OceanAds 海水不可斗量數位工作室製作</span>
+            <a href="https://oceanads.org/" data-real-link>oceanads.org</a>
+            <a href="https://github.com/lovemage/sakuga-motion-demo" data-real-link>GitHub</a>
+        </footer>
     </main>
 
     <dialog class="mobile-nav" id="mobile-nav" aria-label="網站導覽">
@@ -577,7 +594,7 @@
         document.addEventListener('sakuga:navigate', (e) => { e.preventDefault(); const a = e.target; setTimeout(() => simulate(a), e.detail.delay); });
         document.addEventListener('click', (e) => {
             const a = e.target.closest('a[href]');
-            if (!a || e.defaultPrevented || a.closest('[data-lang-picker]')) return;   // 語言選單照常換頁
+            if (!a || e.defaultPrevented || a.closest('[data-lang-picker], [data-real-link]')) return;   // 語言選單、GitHub、工作室連結照常換頁
             e.preventDefault(); simulate(a);
         });
 
