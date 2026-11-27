@@ -6,6 +6,8 @@ OceanAds 的點擊回饋動畫展示頁：按鈕被點時會像手繪動畫（�
 
 **線上展示：https://lovemage.github.io/sakuga-motion-demo/**
 
+其他語言：[English](https://lovemage.github.io/sakuga-motion-demo/?lang=en) · [日本語](https://lovemage.github.io/sakuga-motion-demo/?lang=ja) · [한국어](https://lovemage.github.io/sakuga-motion-demo/?lang=ko)
+
 全部用原生 JavaScript 和 CSS 寫成，不依賴任何動畫函式庫，也不需要建置步驟。
 
 ---
@@ -24,6 +26,32 @@ OceanAds 的點擊回饋動畫展示頁：按鈕被點時會像手繪動畫（�
 | 音效字 | 中文向量音效字一覽 |
 
 每張卡片右上角有一支**速度拉桿（0.1×–1×）**，調慢就能看清楚每一格動作。每張卡片也附了**「提示詞」**按鈕，可以一鍵複製給 AI agent（例如 Claude Code）的設計說明，讓它在你自己的網站上做出同樣的效果。
+
+## 多語系
+
+展示頁有繁體中文、English、日本語、한국어 四個版本，用網址參數 `?lang=en|ja|ko` 切換（沒有參數就是繁體中文），頁面右上角也有語言選單。切換後，介面文字、無障礙標籤、給 agent 的提示詞，連音效字都會換成該語言：
+
+| id | 繁體中文 | English | 日本語 | 한국어 |
+| --- | --- | --- | --- | --- |
+| `dong` | 咚！ | THUD! | ドン！ | 쿵! |
+| `peng` | 砰！ | BANG! | バン！ | 쾅! |
+| `shua` | 唰！ | SWISH! | シュッ | 슉! |
+| `ding` | 叮！ | DING! | チーン | 띵! |
+| `pa` | 啪！ | WHAP! | パシッ | 탁! |
+| `xiu` | 咻～ | ZIP! | ヒュッ | 휙~ |
+| `hong` | 轟轟轟 | RUMBLE | ゴゴゴ | 우르릉 |
+| `ka` | 喀！ | CLICK! | カチッ | 딸깍! |
+| `bo` | 啵！ | POP! | ポン！ | 뽕! |
+| `cha` | 嚓！ | SNAP! | パチッ | 착! |
+| `lulu` | 咻嚕嚕 | WHIRR! | クルクル | 빙글~ |
+
+每種語言的音效字都是同一組 id，所以每個特效在哪個語言都照常運作。字形是向量路徑，每個字都會稍微傾斜、錯位，看起來像手寫的漫畫字。要換字或加語言，改 `scripts/build-sfx-intl.py` 後重新產生：
+
+```bash
+python scripts/build-sfx-intl.py --fonts <字型資料夾>
+```
+
+字型不放在 repo 裡，下載位置寫在腳本開頭。
 
 ## 動畫原理
 
@@ -105,6 +133,16 @@ OceanAds 的點擊回饋動畫展示頁：按鈕被點時會像手繪動畫（�
 <button class="sk-daynight" data-sk-daynight>…</button>
 ```
 
+無障礙標籤預設是中文，可以用屬性換成其他語言：語言切換用 `data-label-zh` / `data-label-en`（目前在左邊／右邊時的標籤），日夜切換用 `data-label-day` / `data-label-night`。
+
+### 換成其他語言的音效字
+
+在 `sakuga-motion.js` 之前載入 `sakuga-sfx-paths.intl.js`，再把字組換掉即可：
+
+```js
+window.OA_SFX = window.OA_SFX_SETS.ja;   // en、ja、ko
+```
+
 ### JavaScript API
 
 ```js
@@ -130,9 +168,13 @@ const stop = K.drive((dt) => { /* 每格執行，回傳 false 即移除 */ });
 | `sakuga-controls.js` / `.css` | 下拉選單、語言切換、日夜切換 |
 | `navigation-motion.css` | 全螢幕雙層導覽選單 |
 | `sakuga-sfx-paths.js` | 中文音效字的 SVG 路徑（自動產生，請勿手動修改） |
+| `sakuga-sfx-paths.intl.js` | 英文、日文、韓文音效字的 SVG 路徑（由 `scripts/build-sfx-intl.py` 產生） |
+| `sakuga-i18n.js` | 展示頁的多語系：依 `?lang=` 翻譯文字、標籤，並換掉音效字 |
 | `sakuga-prompts.js` | 每張卡片的「給 agent 的提示詞」 |
+| `sakuga-prompts.en.js` / `.ja.js` / `.ko.js` | 提示詞的英文、日文、韓文版 |
+| `scripts/build-sfx-intl.py` | 產生英文、日文、韓文音效字 |
 | `fonts/` | Leon Sans 字型 |
-| `images/sfx/` | 音效字 SVG |
+| `images/sfx/` | 音效字 SVG（`en/`、`ja/`、`ko/` 為各語言版本） |
 
 ## 本機預覽
 
@@ -146,10 +188,16 @@ python -m http.server 8000
 
 修改 CSS / JS 後，記得更新 `index.html` 裡的 `?v=` 版本參數，避免瀏覽器讀到快取的舊檔。
 
-## 致謝與授權
+## 授權
+
+程式碼採用 [MIT License](LICENSE)，可以自由使用、修改、商用，只要保留授權聲明。字型與字形另有授權，見下方。
+
+## 致謝
 
 - 動畫手法參考 [sakuga-vfx](https://github.com/finktheartist/sakuga-vfx)（MIT）
-- 音效字字形來自 Noto Sans CJK TC Black（SIL OFL 1.1）
+- 中文音效字字形來自 Noto Sans CJK TC Black（SIL OFL 1.1）
+- 日文、韓文音效字字形來自 Noto Sans CJK JP Black、Noto Sans CJK KR Black（SIL OFL 1.1）
+- 英文音效字字形來自 [Bangers](https://github.com/google/fonts/tree/main/ofl/bangers)（SIL OFL 1.1）
 - Leon Sans 字型授權見 `fonts/OFL-LeonSans.txt`
 
 ---

@@ -110,7 +110,8 @@
         const sync = () => {
             opts.forEach((o, i) => o.classList.toggle('is-active', i === cur));
             btn.dataset.current = cur ? 'en' : 'zh';
-            btn.setAttribute('aria-label', cur ? '目前 English，切換為繁體中文' : '目前繁體中文，切換為 English');
+            // 無障礙標籤可用 data-label-zh / data-label-en 覆寫（多語系頁面）
+            btn.setAttribute('aria-label', cur ? (btn.dataset.labelEn || '目前 English，切換為繁體中文') : (btn.dataset.labelZh || '目前繁體中文，切換為 English'));
         };
         sync();
         requestAnimationFrame(place);
@@ -155,7 +156,8 @@
         let stop = null;
         const isDay = () => document.body.classList.contains('day-mode');
         const label = () => {
-            const t = isDay() ? '切換為夜間模式' : '切換為日間模式';
+            // 可用 data-label-day / data-label-night 覆寫（多語系頁面）
+            const t = isDay() ? (btn.dataset.labelDay || '切換為夜間模式') : (btn.dataset.labelNight || '切換為日間模式');
             btn.setAttribute('aria-label', t); btn.title = t;
         };
         ang.x = ang.to = isDay() ? 0 : 180;

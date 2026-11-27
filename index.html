@@ -6,16 +6,33 @@
     <meta name="robots" content="noindex, nofollow">
     <title>點擊動畫展示 | OceanAds</title>
     <link rel="icon" href="favicon.png">
-    <link rel="stylesheet" href="navigation-motion.css?v=202611261406">
-    <link rel="stylesheet" href="sakuga-motion.css?v=202611261406">
-    <link rel="stylesheet" href="sakuga-controls.css?v=202611261406">
-    <link rel="stylesheet" href="sakuga-widgets.css?v=202611261406">
-    <script src="sakuga-sfx-paths.js?v=202611261406" defer></script>
-    <script src="sakuga-motion.js?v=202611261406" data-auto defer></script>
-    <script src="sakuga-controls.js?v=202611261406" defer></script>
-    <script src="sakuga-widgets.js?v=202611261406" defer></script>
-    <script src="sakuga-prompts.js?v=202611261406" defer></script>
+    <link rel="alternate" hreflang="zh-Hant" href="https://lovemage.github.io/sakuga-motion-demo/">
+    <link rel="alternate" hreflang="en" href="https://lovemage.github.io/sakuga-motion-demo/?lang=en">
+    <link rel="alternate" hreflang="ja" href="https://lovemage.github.io/sakuga-motion-demo/?lang=ja">
+    <link rel="alternate" hreflang="ko" href="https://lovemage.github.io/sakuga-motion-demo/?lang=ko">
+    <script>
+        /* 非繁中頁面：翻譯完成前先隱藏，避免閃一下中文（sakuga-i18n.js 會移除；3 秒保底） */
+        if (/[?&]lang=(en|ja|ko)/.test(location.search)) {
+            document.documentElement.classList.add('i18n-wait');
+            setTimeout(() => document.documentElement.classList.remove('i18n-wait'), 3000);
+        }
+    </script>
+    <link rel="stylesheet" href="navigation-motion.css?v=202611270800">
+    <link rel="stylesheet" href="sakuga-motion.css?v=202611270800">
+    <link rel="stylesheet" href="sakuga-controls.css?v=202611270800">
+    <link rel="stylesheet" href="sakuga-widgets.css?v=202611270800">
+    <script src="sakuga-sfx-paths.js?v=202611270800" defer></script>
+    <script src="sakuga-sfx-paths.intl.js?v=202611270800" defer></script>
+    <script src="sakuga-i18n.js?v=202611270800" defer></script>
+    <script src="sakuga-motion.js?v=202611270800" data-auto defer></script>
+    <script src="sakuga-controls.js?v=202611270800" defer></script>
+    <script src="sakuga-widgets.js?v=202611270800" defer></script>
+    <script src="sakuga-prompts.js?v=202611270800" defer></script>
+    <script src="sakuga-prompts.en.js?v=202611270800" defer></script>
+    <script src="sakuga-prompts.ja.js?v=202611270800" defer></script>
+    <script src="sakuga-prompts.ko.js?v=202611270800" defer></script>
     <style>
+        html.i18n-wait body { visibility: hidden; }
         @font-face { font-family: 'Leon Sans'; font-weight: 300 900; font-display: swap; src: url('fonts/leon-sans-var.woff2') format('woff2'); }
 
         body.expo-theme {
@@ -39,12 +56,21 @@
             font-family: 'Leon Sans', 'Noto Sans TC', 'PingFang TC', system-ui, sans-serif;
             -webkit-font-smoothing: antialiased;
         }
+        :lang(ja) body.expo-theme { font-family: 'Leon Sans', 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', 'Meiryo', system-ui, sans-serif; }
+        :lang(ko) body.expo-theme { font-family: 'Leon Sans', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif; }
         * { box-sizing: border-box; }
         ::selection { background: #ffd23f; color: #1b1b2f; }
         :focus-visible { outline: 2px solid #1b1b2f; outline-offset: 3px; }
 
         .page { max-width: 1200px; margin: 0 auto; padding: 48px clamp(16px, 4vw, 40px) 96px; }
-        h1 { margin: 0 0 28px; font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+        .top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin: 0 0 28px; }
+        h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+
+        /* 語言選單 */
+        .langs { display: flex; gap: 4px; padding: 4px; border: 2px solid #1b1b2f; border-radius: var(--r); }
+        .langs a { padding: 6px 12px; border-radius: 7px; color: #1b1b2f; font-size: 14px; font-weight: 700; text-decoration: none; }
+        .langs a:hover { background: #f5f6fa; }
+        .langs a[aria-current='page'] { background: #1b1b2f; color: #fff; }
         .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
         @media (max-width: 1000px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
@@ -143,7 +169,8 @@
         @media (max-width: 640px) { .card.wide { grid-column: auto; } .sfx { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
         .sfx button { display: grid; place-items: center; height: 72px; border: 0; border-radius: var(--r); background: #fff; color: #1b1b2f; cursor: pointer; }
         .sfx button:hover { color: #1b1b2f; }
-        .sfx svg { width: 64px; height: 44px; }
+        .sfx svg { width: min(100%, 104px); height: 44px; }
+        .sfx button { padding: 0 8px; }
 
         /* 給 agent 的提示詞 */
         .pr { display: flex; gap: 6px; padding: 0 14px 14px; }
@@ -200,7 +227,10 @@
 </head>
 <body class="expo-theme day-mode">
     <main class="page">
-        <h1>點擊動畫展示</h1>
+        <div class="top">
+            <h1>點擊動畫展示</h1>
+            <nav class="langs" data-lang-picker aria-label="語言"></nav>
+        </div>
         <div class="master" data-prompt="總覽"></div>
         <div class="grid">
 
@@ -428,6 +458,7 @@
         const K = window.OASakuga;
         const $ = (s, r = document) => r.querySelector(s);
         const reduced = () => K.reduced();
+        const I = window.SK_I18N, t = I.t;
 
         // ── 每張卡片一支速度拉桿（0.1×–1×），在卡片內按下時套用 ──
         let menuSpeed = 1;
@@ -435,7 +466,7 @@
             const title = card.querySelector('h2').textContent;
             const wrap = document.createElement('label');
             wrap.className = 'spd';
-            wrap.innerHTML = `<input type="range" min="0.1" max="1" step="0.05" value="1" aria-label="${title} 播放速度"><output>1.00×</output>`;
+            wrap.innerHTML = `<input type="range" min="0.1" max="1" step="0.05" value="1" aria-label="${t('{0} 播放速度', title)}"><output>1.00×</output>`;
             card.querySelector('header').append(wrap);
             const input = wrap.querySelector('input'), out = wrap.querySelector('output');
             const sync = () => {
@@ -463,7 +494,7 @@
         const toast = $('#toast');
         let tt;
         const say = (msg) => { toast.textContent = msg; toast.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => toast.classList.remove('on'), 1800); };
-        document.addEventListener('sakuga:lang', (e) => say(e.detail.lang === 'en' ? '→ /en/' : '→ 繁體中文'));
+        document.addEventListener('sakuga:lang', (e) => say(e.detail.lang === 'en' ? '→ English' : `→ ${I.toggleName()}`));
 
         // ── 給 agent 的提示詞：每張卡片底部可展開、可複製 ──
         async function copyText(text) {
@@ -477,12 +508,12 @@
         }
         let prId = 0;
         function mountPrompt(host, key, label) {
-            const text = (window.SK_PROMPTS || {})[key];
+            const text = I.prompt(key), name = label || I.title(key);
             if (!text) return;
             const id = `pr-${++prId}`;
             const bar = document.createElement('div');
             bar.className = 'pr';
-            bar.innerHTML = `${label ? `<strong>${label}</strong>` : ''}<button type="button" class="pr-btn" aria-expanded="false" aria-controls="${id}">提示詞</button><button type="button" class="pr-btn pr-copy" data-sakuga="tag">複製提示詞</button>`;
+            bar.innerHTML = `${label ? `<strong>${label}</strong>` : ''}<button type="button" class="pr-btn" aria-expanded="false" aria-controls="${id}">${t('提示詞')}</button><button type="button" class="pr-btn pr-copy" data-sakuga="tag">${t('複製提示詞')}</button>`;
             const pre = document.createElement('pre');
             pre.className = 'pr-text'; pre.id = id; pre.hidden = true; pre.textContent = text;
             host.append(bar, pre);
@@ -493,14 +524,14 @@
             });
             copy.addEventListener('click', async () => {
                 const ok = await copyText(text);
-                copy.textContent = ok ? '已複製' : '複製失敗';
+                copy.textContent = ok ? t('已複製') : t('複製失敗');
                 copy.classList.toggle('done', ok);
-                say(ok ? `已複製「${key}」提示詞` : '複製失敗，請展開後手動選取');
-                setTimeout(() => { copy.textContent = '複製提示詞'; copy.classList.remove('done'); }, 1600);
+                say(ok ? t('已複製「{0}」提示詞', name) : t('複製失敗，請展開後手動選取'));
+                setTimeout(() => { copy.textContent = t('複製提示詞'); copy.classList.remove('done'); }, 1600);
             });
         }
-        mountPrompt($('.master'), '總覽', '給 Agent 的總提示詞');
-        document.querySelectorAll('.card').forEach((card) => mountPrompt(card, card.querySelector('h2').textContent.trim()));
+        mountPrompt($('.master'), '總覽', t('給 Agent 的總提示詞'));
+        document.querySelectorAll('.card').forEach((card) => mountPrompt(card, card.dataset.key));
 
         // ── 分類標籤 ──
         document.querySelectorAll('.filters .filter-btn').forEach((b) => b.addEventListener('click', () => {
@@ -546,7 +577,7 @@
         document.addEventListener('sakuga:navigate', (e) => { e.preventDefault(); const a = e.target; setTimeout(() => simulate(a), e.detail.delay); });
         document.addEventListener('click', (e) => {
             const a = e.target.closest('a[href]');
-            if (!a || e.defaultPrevented) return;
+            if (!a || e.defaultPrevented || a.closest('[data-lang-picker]')) return;   // 語言選單照常換頁
             e.preventDefault(); simulate(a);
         });
 
@@ -557,7 +588,7 @@
             const P = prog.skw;
             clearTimeout(simTimer);
             P.reset();
-            go.textContent = '重新上傳';
+            go.textContent = t('重新上傳');
             let v = 0;
             const step = () => {
                 v = Math.min(1, v + (Math.random() < 0.25 ? 0.22 : 0.07));
@@ -568,14 +599,13 @@
         });
 
         // ── 通知 ──
-        $('#toast-go').addEventListener('click', () => $('#skw-toast').skw.show('已儲存！'));
+        $('#toast-go').addEventListener('click', () => $('#skw-toast').skw.show(t('已儲存！')));
 
         // ── 音效字 ──
         const grid = $('#sfx');
-        const NAMES = { dong: '咚！', peng: '砰！', shua: '唰！', ding: '叮！', pa: '啪！', xiu: '咻～', hong: '轟轟轟', ka: '喀！', bo: '啵！', cha: '嚓！', lulu: '咻嚕嚕' };
         for (const [id, [w, h, d]] of Object.entries(window.OA_SFX || {})) {
             const b = document.createElement('button');
-            b.type = 'button'; b.setAttribute('aria-label', `播放 ${NAMES[id] || id}`);
+            b.type = 'button'; b.setAttribute('aria-label', t('播放 {0}', I.sfxName(id)));
             b.innerHTML = `<svg viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${d}" fill="currentColor"/></svg>`;
             b.addEventListener('click', () => {
                 if (reduced()) return;
